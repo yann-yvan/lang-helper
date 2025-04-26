@@ -4,10 +4,10 @@ namespace NyCorp\LangHelperGenerator;
 
 use Illuminate\Support\Facades\File;
 
-class LangHelperGenerator {
-
-
+class LangHelperGenerator
+{
     protected array $translations = [];
+
     protected string $outputPath = 'app/Helpers/Lang/';
 
     public function generate()
@@ -31,7 +31,7 @@ class LangHelperGenerator {
     protected function parseTranslations(array $translations, string $prefix): void
     {
         foreach ($translations as $key => $value) {
-            $fullKey = $prefix . '.' . $key;
+            $fullKey = $prefix.'.'.$key;
             if (is_array($value)) {
                 $this->parseTranslations($value, $fullKey);
             } else {
