@@ -7,7 +7,6 @@ use Illuminate\Support\Str;
 
 class LangHelperWriter
 {
-
     protected array $translations;
 
     public function __construct(array $translations)
@@ -30,7 +29,7 @@ class LangHelperWriter
         }
 
         foreach ($groups as $groupName => $items) {
-            $rootClass .= "    public static function " . lcfirst($groupName) . "(): \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations\n    {\n";
+            $rootClass .= '    public static function '.lcfirst($groupName)."(): \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations\n    {\n";
             $rootClass .= "        return new \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations();\n    }\n\n";
             $this->generateGroup($groupName, $items);
         }
@@ -46,7 +45,7 @@ class LangHelperWriter
         $groupPath = app_path("Helpers/Lang/$groupName");
         File::ensureDirectoryExists($groupPath);
 
-        $methods = "";
+        $methods = '';
 
         $subGroups = [];
 
@@ -62,8 +61,8 @@ class LangHelperWriter
         }
 
         foreach ($subGroups as $subGroup => $subs) {
-            $methods .= "    public function " . lcfirst(Str::studly($subGroup)) . "(): \\App\\Helpers\\Lang\\$groupName\\" . Str::studly($subGroup) . "Translations\n    {\n";
-            $methods .= "        return new \\App\\Helpers\\Lang\\$groupName\\" . Str::studly($subGroup) . "Translations();\n    }\n\n";
+            $methods .= '    public function '.lcfirst(Str::studly($subGroup))."(): \\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup)."Translations\n    {\n";
+            $methods .= "        return new \\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup)."Translations();\n    }\n\n";
             $this->generateSubGroup($groupName, $subGroup, $subs);
         }
 
@@ -76,15 +75,15 @@ class LangHelperWriter
         $subGroupPath = app_path("Helpers/Lang/$groupName");
         File::ensureDirectoryExists($subGroupPath);
 
-        $methods = "";
+        $methods = '';
 
         foreach ($items as $subKey => $fullKey) {
-            $methodName = lcfirst(Str::studly(Str::replace('.','_',$subKey)));
+            $methodName = lcfirst(Str::studly(Str::replace('.', '_', $subKey)));
             $methods .= "    public function $methodName(): string\n    {\n";
             $methods .= "        return __('$fullKey');\n    }\n\n";
         }
 
-        $content = "<?php\n\nnamespace App\Helpers\Lang\\$groupName;\n\nclass " . Str::studly($subGroup) . "Translations\n{\n$methods}\n";
-        File::put("$subGroupPath/" . Str::studly($subGroup) . "Translations.php", $content);
+        $content = "<?php\n\nnamespace App\Helpers\Lang\\$groupName;\n\nclass ".Str::studly($subGroup)."Translations\n{\n$methods}\n";
+        File::put("$subGroupPath/".Str::studly($subGroup).'Translations.php', $content);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace NyCorp\LangHelperGenerator\Commands;
 
-
 use Illuminate\Console\Command;
 use NyCorp\LangHelperGenerator\LangHelperGenerator;
 use NyCorp\LangHelperGenerator\UnusedTranslationDetector;
@@ -30,14 +29,14 @@ class LangHelperGeneratorCommand extends Command
     {
         $this->info('🔵 Generating LangHelper...');
 
-        $generator = new LangHelperGenerator();
+        $generator = new LangHelperGenerator;
         $generator->generate();
 
         $this->info('✅ LangHelper generated successfully.');
 
         if ($this->option('detect-unused')) {
             $this->warn('🧹 Detecting unused translations...');
-            $detector = new UnusedTranslationDetector();
+            $detector = new UnusedTranslationDetector;
             $detector->detect();
         }
     }

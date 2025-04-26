@@ -4,13 +4,13 @@ namespace NyCorp\LangHelperGenerator;
 
 class UnusedTranslationDetector
 {
-
     public function detect(): void
     {
         $helperPath = app_path('Helpers/LangHelper.php');
 
-        if (!file_exists($helperPath)) {
+        if (! file_exists($helperPath)) {
             echo "LangHelper.php not found.\n";
+
             return;
         }
 
@@ -49,7 +49,7 @@ class UnusedTranslationDetector
         $files = [];
 
         foreach ($rii as $file) {
-            if (!$file->isDir() && $file->getExtension() === 'php') {
+            if (! $file->isDir() && $file->getExtension() === 'php') {
                 $files[] = $file->getPathname();
             }
         }

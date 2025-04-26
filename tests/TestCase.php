@@ -3,8 +3,8 @@
 namespace NyCorp\LangHelperGenerator\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Orchestra\Testbench\TestCase as Orchestra;
 use NyCorp\LangHelperGenerator\LangHelperGeneratorServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
