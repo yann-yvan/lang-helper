@@ -1,6 +1,6 @@
 # LangHelper Generator for Laravel
 
-[![Cover](cover.png)]
+![Cover](cover.png)
 
 ---
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/nycorp/lang-helper.svg?style=flat-square)](https://packagist.org/packages/nycorp/lang-helper)
