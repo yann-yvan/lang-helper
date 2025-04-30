@@ -3,7 +3,7 @@
 // config for NyCorp/LangHelperGenerator
 return [
     'excluded_directories' => [
-        'vendor'
+        'vendor',
     ],
     'excluded_lang_files' => [
         // auth

@@ -29,7 +29,7 @@ class LangHelperWriter
         }
 
         foreach ($groups as $groupName => $items) {
-            $rootClass .= '    public static function ' . lcfirst($groupName) . "(): \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations\n    {\n";
+            $rootClass .= '    public static function '.lcfirst($groupName)."(): \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations\n    {\n";
             $rootClass .= "        return new \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations();\n    }\n\n";
             $this->generateGroup($groupName, $items);
         }
@@ -60,8 +60,8 @@ class LangHelperWriter
         }
 
         foreach ($subGroups as $subGroup => $subs) {
-            $methods .= '    public function ' . lcfirst(Str::studly($subGroup)) . "(): \\App\\Helpers\\Lang\\$groupName\\" . Str::studly($subGroup) . "Translations\n    {\n";
-            $methods .= "        return new \\App\\Helpers\\Lang\\$groupName\\" . Str::studly($subGroup) . "Translations();\n    }\n\n";
+            $methods .= '    public function '.lcfirst(Str::studly($subGroup))."(): \\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup)."Translations\n    {\n";
+            $methods .= "        return new \\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup)."Translations();\n    }\n\n";
             $this->generateSubGroup($groupName, $subGroup, $subs);
         }
 
@@ -73,10 +73,10 @@ class LangHelperWriter
     {
 
         // Create method
-        $paramsString = $parameters ? implode(', ', array_map(static fn($p) => "string \${$p}", $parameters)) : '';
-        $assocArray = $parameters ? '[' . implode(', ', array_map(static fn($p) => "'$p' => \${$p}", $parameters)) . ']' : '[]';
+        $paramsString = $parameters ? implode(', ', array_map(static fn ($p) => "string \${$p}", $parameters)) : '';
+        $assocArray = $parameters ? '['.implode(', ', array_map(static fn ($p) => "'$p' => \${$p}", $parameters)).']' : '[]';
 
-        $docParameters = "";
+        $docParameters = '';
         if ($parameters) {
             foreach ($parameters as $param) {
                 $docParameters .= "\n      * @param string \${$param}";
@@ -101,7 +101,7 @@ class LangHelperWriter
         $parameters = [];
 
         preg_match_all('/:(\w+)/', $locale, $matches);
-        if (!empty($matches[1])) {
+        if (! empty($matches[1])) {
             $parameters = array_merge($parameters, $matches[1]);
         }
 
@@ -117,10 +117,10 @@ class LangHelperWriter
 
         foreach ($items as $subKey => $fullKey) {
             $methodName = lcfirst(Str::studly(Str::replace('.', '_', $subKey)));
-            $methods .= $this->methodTemplate($methodName, $fullKey,parameters: $this->detectParameters($this->translations[$fullKey]));
+            $methods .= $this->methodTemplate($methodName, $fullKey, parameters: $this->detectParameters($this->translations[$fullKey]));
         }
 
-        $content = "<?php\n\nnamespace App\Helpers\Lang\\$groupName;\n\nclass " . Str::studly($subGroup) . "Translations\n{\n$methods}\n";
-        File::put("$subGroupPath/" . Str::studly($subGroup) . 'Translations.php', $content);
+        $content = "<?php\n\nnamespace App\Helpers\Lang\\$groupName;\n\nclass ".Str::studly($subGroup)."Translations\n{\n$methods}\n";
+        File::put("$subGroupPath/".Str::studly($subGroup).'Translations.php', $content);
     }
 }
