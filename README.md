@@ -54,6 +54,12 @@ LangHelper::validation()->email();
 LangHelper::validation()->email($value);
 ```
 
+non existing file will generate
+```php
+LangHelper::navigation()->home();
+// will return navigation.home
+```
+
 You can publish the config file with:
 
 ```bash
