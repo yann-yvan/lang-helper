@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 class LangHelperWriter
 {
     protected array $translations;
+
     private string $namespace = 'App\Helpers\Lang';
 
     public function __construct(array $translations)
@@ -15,10 +16,8 @@ class LangHelperWriter
         $this->translations = $translations;
     }
 
-
     public function write(): void
     {
-
 
         $groups = [];
 
@@ -30,7 +29,7 @@ class LangHelperWriter
             $groups[$group][$subPath] = $key;
         }
 
-        $methods = "";
+        $methods = '';
         foreach ($groups as $groupName => $items) {
 
             $className = lcfirst($groupName);
@@ -45,7 +44,6 @@ class LangHelperWriter
 
             $this->generateGroup($groupName, $items);
         }
-
 
         $content = <<<CLASS
                       <?php
@@ -62,7 +60,6 @@ class LangHelperWriter
                       }
 
                       CLASS;
-
 
         File::ensureDirectoryExists(app_path('Helpers/Lang'));
         File::put(app_path('Helpers/LangHelper.php'), $content);
@@ -91,7 +88,7 @@ class LangHelperWriter
         foreach ($subGroups as $subGroup => $subs) {
 
             $methodName = lcfirst(Str::studly($subGroup));
-            $classPath = "\\App\\Helpers\\Lang\\$groupName\\" . Str::studly($subGroup) . "Translations";
+            $classPath = "\\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup).'Translations';
             $methods .= <<<CLASS
                                  public function $methodName(): $classPath
                                  {
@@ -119,7 +116,6 @@ class LangHelperWriter
 
                      CLASS;
 
-
         File::put("$groupPath/{$groupName}Translations.php", $content);
     }
 
@@ -127,8 +123,8 @@ class LangHelperWriter
     {
 
         // Create method
-        $paramsString = $parameters ? implode(', ', array_map(static fn($p) => "string \${$p}", $parameters)) : '';
-        $assocArray = $parameters ? '[' . implode(', ', array_map(static fn($p) => "'$p' => \${$p}", $parameters)) . ']' : '[]';
+        $paramsString = $parameters ? implode(', ', array_map(static fn ($p) => "string \${$p}", $parameters)) : '';
+        $assocArray = $parameters ? '['.implode(', ', array_map(static fn ($p) => "'$p' => \${$p}", $parameters)).']' : '[]';
 
         $docParameters = '';
         if ($parameters) {
@@ -157,7 +153,7 @@ class LangHelperWriter
         $parameters = [];
 
         preg_match_all('/:(\w+)/', $locale, $matches);
-        if (!empty($matches[1])) {
+        if (! empty($matches[1])) {
             $parameters = array_merge($parameters, $matches[1]);
         }
 
@@ -193,7 +189,7 @@ class LangHelperWriter
 
                       CLASS;
 
-        File::put("$subGroupPath/" . Str::studly($subGroup) . 'Translations.php', $content);
+        File::put("$subGroupPath/".Str::studly($subGroup).'Translations.php', $content);
     }
 
     public function generateSafetyClass(): void
@@ -230,6 +226,6 @@ class LangHelperWriter
 
                         CLASS;
 
-        File::put(app_path("Helpers/Lang/LangSafety.php"), $content);
+        File::put(app_path('Helpers/Lang/LangSafety.php'), $content);
     }
 }
