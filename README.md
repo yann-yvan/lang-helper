@@ -51,6 +51,27 @@ This will list all unused translation methods.
 ```php
 LangHelper::auth()->password()->reset();
 LangHelper::validation()->email();
+LangHelper::validation()->email($value);
+```
+
+You can publish the config file with:
+
+```bash
+php artisan vendor:publish --tag=":lang-helper-config"
+```
+
+This is the contents of the published config file:
+
+```php
+return [
+    'excluded_directories' => [
+        'vendor'
+    ],
+    'excluded_lang_files' => [
+        // auth
+    ],
+];
+
 ```
 
 ---

@@ -17,7 +17,7 @@ class LangHelperGeneratorServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('lang-helper')
-            // ->hasConfigFile()
+            ->hasConfigFile()
             // ->hasViews()
             // ->hasMigration('create_lang_helper_table')
             ->hasCommand(LangHelperGeneratorCommand::class);
