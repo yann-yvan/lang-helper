@@ -57,7 +57,7 @@ LangHelper::validation()->email($value);
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag=":lang-helper-config"
+php artisan vendor:publish --tag="lang-helper-config"
 ```
 
 This is the contents of the published config file:
