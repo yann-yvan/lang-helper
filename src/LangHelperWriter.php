@@ -8,15 +8,17 @@ use Illuminate\Support\Str;
 class LangHelperWriter
 {
     protected array $translations;
+    private string $namespace = 'App\Helpers\Lang';
 
     public function __construct(array $translations)
     {
         $this->translations = $translations;
     }
 
+
     public function write(): void
     {
-        $rootClass = "<?php\n\nnamespace App\Helpers;\n\nclass LangHelper\n{\n";
+
 
         $groups = [];
 
@@ -28,16 +30,43 @@ class LangHelperWriter
             $groups[$group][$subPath] = $key;
         }
 
+        $methods = "";
         foreach ($groups as $groupName => $items) {
-            $rootClass .= '    public static function '.lcfirst($groupName)."(): \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations\n    {\n";
-            $rootClass .= "        return new \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations();\n    }\n\n";
+
+            $className = lcfirst($groupName);
+            $methods .= <<<CLASS
+                             public static function $className(): \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations
+                             {
+                                return new \\App\\Helpers\\Lang\\$groupName\\{$groupName}Translations();
+                             }
+
+
+                            CLASS;
+
             $this->generateGroup($groupName, $items);
         }
 
-        $rootClass .= "}\n";
+
+        $content = <<<CLASS
+                      <?php
+
+                      namespace App\Helpers;
+
+                      use $this->namespace\LangSafety;
+
+                      class LangHelper
+                      {
+                        use LangSafety;
+
+                        $methods
+                      }
+
+                      CLASS;
+
 
         File::ensureDirectoryExists(app_path('Helpers/Lang'));
-        File::put(app_path('Helpers/LangHelper.php'), $rootClass);
+        File::put(app_path('Helpers/LangHelper.php'), $content);
+        $this->generateSafetyClass();
     }
 
     protected function generateGroup($groupName, $items): void
@@ -60,38 +89,65 @@ class LangHelperWriter
         }
 
         foreach ($subGroups as $subGroup => $subs) {
-            $methods .= '    public function '.lcfirst(Str::studly($subGroup))."(): \\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup)."Translations\n    {\n";
-            $methods .= "        return new \\App\\Helpers\\Lang\\$groupName\\".Str::studly($subGroup)."Translations();\n    }\n\n";
+
+            $methodName = lcfirst(Str::studly($subGroup));
+            $classPath = "\\App\\Helpers\\Lang\\$groupName\\" . Str::studly($subGroup) . "Translations";
+            $methods .= <<<CLASS
+                                 public function $methodName(): $classPath
+                                 {
+                                    return new $classPath();
+                                 }
+
+                            CLASS;
+
             $this->generateSubGroup($groupName, $subGroup, $subs);
         }
 
-        $content = "<?php\n\nnamespace App\Helpers\Lang\\$groupName;\n\nclass {$groupName}Translations\n{\n$methods}\n";
+        $content = <<<CLASS
+                     <?php
+
+                     namespace App\Helpers\Lang\\$groupName;
+
+                     use $this->namespace\LangSafety;
+
+                     class {$groupName}Translations
+                     {
+                        use LangSafety;
+
+                        $methods
+                     }
+
+                     CLASS;
+
+
         File::put("$groupPath/{$groupName}Translations.php", $content);
     }
 
-    public function methodTemplate(string $name, string $fullKey, array $parameters = [], string $returnType = ':string'): string
+    public function methodTemplate(string $name, string $fullKey, array $parameters = [], string $returnType = ': string'): string
     {
 
         // Create method
-        $paramsString = $parameters ? implode(', ', array_map(static fn ($p) => "string \${$p}", $parameters)) : '';
-        $assocArray = $parameters ? '['.implode(', ', array_map(static fn ($p) => "'$p' => \${$p}", $parameters)).']' : '[]';
+        $paramsString = $parameters ? implode(', ', array_map(static fn($p) => "string \${$p}", $parameters)) : '';
+        $assocArray = $parameters ? '[' . implode(', ', array_map(static fn($p) => "'$p' => \${$p}", $parameters)) . ']' : '[]';
 
         $docParameters = '';
         if ($parameters) {
             foreach ($parameters as $param) {
-                $docParameters .= "\n      * @param string \${$param}";
+                $docParameters .= "\n\t * @param string \${$param}";
             }
         }
 
         return <<<METHOD
-                        /**
-                        *$docParameters
-                        *
-                        * @return string
-                        */
-                        public function $name($paramsString) $returnType{
-                            return __('$fullKey',$assocArray);
-                        }\n\n
+                      /**$docParameters
+                       *
+                       * @return string
+                       */
+                      public function $name($paramsString)$returnType
+                      {
+                          return __('$fullKey', $assocArray);
+                      }
+
+
                   METHOD;
 
     }
@@ -101,7 +157,7 @@ class LangHelperWriter
         $parameters = [];
 
         preg_match_all('/:(\w+)/', $locale, $matches);
-        if (! empty($matches[1])) {
+        if (!empty($matches[1])) {
             $parameters = array_merge($parameters, $matches[1]);
         }
 
@@ -120,7 +176,60 @@ class LangHelperWriter
             $methods .= $this->methodTemplate($methodName, $fullKey, parameters: $this->detectParameters($this->translations[$fullKey]));
         }
 
-        $content = "<?php\n\nnamespace App\Helpers\Lang\\$groupName;\n\nclass ".Str::studly($subGroup)."Translations\n{\n$methods}\n";
-        File::put("$subGroupPath/".Str::studly($subGroup).'Translations.php', $content);
+        $classGroup = Str::studly($subGroup);
+        $content = <<<CLASS
+                      <?php
+
+                      namespace $this->namespace\\$groupName;
+
+                      use $this->namespace\LangSafety;
+
+                      class {$classGroup}Translations
+                      {
+                        use LangSafety;
+
+                        $methods
+                      }
+
+                      CLASS;
+
+        File::put("$subGroupPath/" . Str::studly($subGroup) . 'Translations.php', $content);
+    }
+
+    public function generateSafetyClass(): void
+    {
+        $content = <<<CLASS
+                        <?php
+
+                        namespace $this->namespace;
+
+                        trait LangSafety {
+
+                            public function __construct(private array \$path = [],private array \$parameters =[])
+                            {
+                            }
+
+                            public static function __callStatic(\$method, \$parameters)
+                            {
+                                return (new static)->__call(\$method, \$parameters);
+                            }
+
+                            public function __call(\$method, \$parameters)
+                            {
+                                \$this->path[] =  \$method;
+                                \$this->parameters = \$parameters;
+                                return \$this;
+                            }
+
+                            public function __toString()
+                            {
+                                return __(implode('.', \$this->path),\$this->parameters);
+                            }
+                        }
+
+
+                        CLASS;
+
+        File::put(app_path("Helpers/Lang/LangSafety.php"), $content);
     }
 }
